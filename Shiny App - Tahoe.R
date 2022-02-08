@@ -20,7 +20,7 @@ ui <- fluidPage(theme = "tahoe.css",
                              ), #end of sidebarPanel
                              mainPanel(
                                "OUTPUT MAP GOES HERE",
-                               plotOutput("eco_ben_map")
+                               plotOutput("eco_ben_reactive_plot")
                              ) #end of mainPanel
                            ) #end of sidebarLayout
                            ),
@@ -32,13 +32,15 @@ ui <- fluidPage(theme = "tahoe.css",
 
 # create server function
 server <- function(input, output) {
+  
   eco_ben_reactive <- reactive({
-    data %>% 
-      filter()
+    benefits %>% 
+      filter(What.forest.benefit.does.your.organization.value.in.this.area. %in% input$ecosystem_service)
   }) #end sw_reactive
   
-  output$eco_ben_reactive <- renderPlot(
-    
+  output$eco_ben_reactive_plot <- renderPlot(
+    ggplot(data = eco_ben_reactive(), aes(x = Recreation, y = Carbon.storage)) +
+      geom_point(aes(color = What.forest.benefit.does.your.organization.value.in.this.area.))
   )
 }
 
