@@ -2,20 +2,58 @@
 library(shiny)
 library(tidyverse)
 library(here)
+library(tmap)
+library(sf)
+library(sp)
 
-benefits <- read.csv(here("data", "benefits_categories.csv"))
+tmap_mode("view")
 
-# create the user interface
+# Read in data for spatial analysis
+benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>% 
+  clean_names() %>% 
+  select(c(14:33,40:41))
+
+impacts_sf <- read_csv(here("data", "adverse_impacts_polygons.shp")) %>% 
+  clean_names() %>% 
+  select(c())
+
+mgmt_sf <- read_csv(here("data", "mgmt_prioritization_polygons.shp")) %>% 
+  clean_names() %>% 
+  select(c())
+
+
+
+
+
+
+
+
+###### Create the user interface
 ui <- fluidPage(theme = "tahoe.css",
+                titlePanel("Ecosystem Services of Interest in the Tahoe-Central Sierra Region - Blue Forest Conservation"),
                 navbarPage(
-                  "Visualizing Ecosystem Services of Interest in the Tahoe-Central Sierra Region - Blue Forest Conservation",
+                  "Explore the Tahoe Basin",
+                  
+                  # Tab 1: Introduction
+                  tabPanel("Overview",
+                           mainPanel("This application visualizes survey responses from individuals in the Tahoe-Central Sierra Region. Surveys were conducted as part of a Group Project at the Bren School.",
+                                     br(),
+                                     br(),
+                                     "The map below depicts the study area.",
+                                     br(),
+                                     plotOutput
+                                     ("tahoe_map"),
+                                     br(),
+                                     br())),
+                 
+                   # Tab 2: Ecosystem benefits
                   tabPanel("Ecosystem benefits",
                            sidebarLayout(
                              sidebarPanel(
                                "WIDGET 1",
                                checkboxGroupInput(inputId = "ecosystem_service",
                                                   label = "Select ecosystem service:",
-                                                  choices = unique(benefits$What.forest.benefit.does.your.organization.value.in.this.area.)
+                                                  choices = unique(benefits_tidy_sf$ecosystem_benefit)
                                                   ) # end checkboxGroupInput
                              ), #end of sidebarPanel
                              mainPanel(
@@ -27,27 +65,47 @@ ui <- fluidPage(theme = "tahoe.css",
                              ) #end of mainPanel
                            ) #end of sidebarLayout
                            ),
+                  
+                  # Tab 3: Impacts/Risks to ecosystem services
                   tabPanel("Impacts/Risks to Ecosystem Services"),
-                  tabPanel("Threats to Ecosystem Services"),
+                  
+                  # Tab 4: Management priority areas
                   tabPanel("Priority Management Areas")
+                  
+                  
                 ) #end of navbarPage
                 ) #end ui
 
 
-# create server function
+###### Create server function
 server <- function(input, output) {
+
   
+# Tab 1: Introduction
+  output$tahoe_map <- renderPlot({
+    ggmap(tahoe_map) +
+      labs(title = "Tahoe-Central Sierra Region") +
+      theme_void()
+  })
+  
+# Tab 2: Ecosystem benefits  
   eco_ben_reactive <- reactive({
-    benefits %>% 
-      filter(What.forest.benefit.does.your.organization.value.in.this.area. %in% input$ecosystem_service)
+    benefits_tidy_sf %>% 
+      filter(ecosystem_benefit %in% input$ecosystem_service)
   }) #end sw_reactive
   
   output$eco_ben_reactive_plot <- renderPlot(
-    ggplot(data = eco_ben_reactive(), aes(x = Recreation, y = Carbon.storage)) +
-      geom_point(aes(color = What.forest.benefit.does.your.organization.value.in.this.area.))
-  )
+    ggplot(data = eco_ben_reactive()) +
+      geom_sf(aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan", alpha = 0.5) +
+      theme_minimal())
+  
+# Tab 3:
+  
+# Tab 4:  
 }
 
-# combine into an app:
+
+
+###### Combine into an app:
 
 shinyApp(ui = ui, server = server)
