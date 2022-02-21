@@ -38,13 +38,15 @@ ui <- fluidPage(theme = "tahoe.css",
                   
                   # Tab 1: Introduction
                   tabPanel("Overview",
-                           mainPanel("The Tahoe-Central Sierra Initiative (TCSI) is a 2.4-million-acre landscape in the Sierra Nevada that spans numerous watersheds and ecosystems in the Tahoe region. The region, like most of the West, has experienced increased wildfires – both in number and severity – over the last twenty years. Management activities that suppressed natural fire on the landscape has led to overgrown and dense forests that are now at risk of high severity fires. Blue Forest Conservation is a non-profit with the goal to help accelerate the pace and scale of forest restoration and management to reduce wildfire risk. Activities such as mechanical thinning and prescribed burns reduce wildfire risk and ensure that ecosystem services are secured. To raise capital to fund expedited forest restoration activities, Blue Forest tasked students at the Bren School of Environmental Science & Management to help assess stakeholder interest in various ecosystem services, benefits provided for free by the forest, throughout the TCSI region. These services include, carbon storage, water yield, social and cultural connections, among numerous other benefits. The objective of this research was to identify and locate where demand for ecosystem services exists, determine where impacts might have the greatest impact to various stakeholders, and determine how and why stakeholders might prefer to prioritize forest management to ensure that ecosystem services continue to be provide benefits to communities throughout the region. In determining ecosystem services of interest and location, Blue Forest believes that it could better persuade communities and beneficiaries of these ecosystem services to contribute financially to their restoration programs now to reduce the risk of high severity wildfires in the region.",
+                           mainPanel(h3("Study Overview"),
+                                     br(),
+                                     p("The Tahoe-Central Sierra Initiative (TCSI) is a 2.4-million-acre landscape in the Sierra Nevada that spans numerous watersheds and ecosystems in the Tahoe region. The region, like most of the West, has experienced increased wildfires – both in number and severity – over the last twenty years. Management activities that suppressed natural fire on the landscape has led to overgrown and dense forests that are now at risk of high severity fires. Blue Forest Conservation is a non-profit with the goal to help accelerate the pace and scale of forest restoration and management to reduce wildfire risk. Activities such as mechanical thinning and prescribed burns reduce wildfire risk and ensure that ecosystem services are secured. To raise capital to fund expedited forest restoration activities, Blue Forest tasked students at the Bren School of Environmental Science & Management to help assess stakeholder interest in various ecosystem services, benefits provided for free by the forest, throughout the TCSI region. These services include, carbon storage, water yield, social and cultural connections, among numerous other benefits. The objective of this research was to identify and locate where demand for ecosystem services exists, determine where impacts might have the greatest impact to various stakeholders, and determine how and why stakeholders might prefer to prioritize forest management to ensure that ecosystem services continue to be provide benefits to communities throughout the region. In determining ecosystem services of interest and location, Blue Forest believes that it could better persuade communities and beneficiaries of these ecosystem services to contribute financially to their restoration programs now to reduce the risk of high severity wildfires in the region."),
                                      br(),
                                      br(),
-                                     "To achieve this goal, the students conducted a survey and participatory GIS mapping activities with stakeholder organizations within the TCSI region. Participants indicated the ecosystem service benefits that their organization values most, the impacts to ecosystem services that would be detrimental to their organization’s mission and how to prioritize management to ensure wildfire risk reductions do not jeopardize their interests in the area.",
+                                     p("To achieve this goal, the students conducted a survey and participatory GIS mapping activities with stakeholder organizations within the TCSI region. Participants indicated the ecosystem service benefits that their organization values most, the impacts to ecosystem services that would be detrimental to their organization’s mission and how to prioritize management to ensure wildfire risk reductions do not jeopardize their interests in the area."),
                                      br(),
                                      br(),
-                                     "This application visualizes survey responses from individuals in the Tahoe-Central Sierra Region. Surveys were conducted as part of a Group Project at the Bren School.",
+                                     p("This application visualizes survey responses from individuals in the Tahoe-Central Sierra Region. Surveys were conducted as part of a Group Project at the Bren School."),
                                      br(),
                                      br(),
                                      "The map below depicts the study area.",
@@ -57,14 +59,14 @@ ui <- fluidPage(theme = "tahoe.css",
                   # Tab 2: Ecosystem Services Overview 
                   tabPanel("Ecosystem Services Overview",
                            sidebarLayout(
-                             sidebarPanel("Learn more about ecosystem services",
+                             sidebarPanel("Learn more about the various ecosystem services",
                                           selectInput(
                                             inputId = "ecosystem_services_checkbox",
                                             label = "Select an option:",
                                             choices = c("Water", "Biodiversity", "Climate Regulation", "Recreation and Cultural Values", "Watershed Services", "General Forest Health"),
                                           ) # end of checkboxGroupInput
                              ),
-                             mainPanel("Overview of the numerous ecosystem services",
+                             mainPanel(h3("Overview of Ecosystem Services in Region"),
                                        textOutput("intro_reactive"),
                                        uiOutput("intro")
                              ))),
