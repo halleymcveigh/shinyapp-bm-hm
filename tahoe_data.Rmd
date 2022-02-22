@@ -16,6 +16,7 @@ library(sf)
 library(maps)
 library(mapdata)
 library(ggmap)
+library(plotly)
 ```
 
 Read in data
@@ -39,7 +40,28 @@ tmap_mode("view")
 # Read in data for spatial analysis
 benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>% 
   clean_names() %>% 
-  select(c(14:33,40:41))
+  select(c(14:33,40:41)) %>% 
+  rename(
+    "Biodiversity" = "biodiversi",
+    "Carbon storage" = "carbon_sto",
+    "Commercial real estate" = "commercial",
+    "Cultural connections" = "cultural_c",
+    "Electric power generation" = "electric_p",
+    "Foraging" = "foraging_a",
+    "Forest products" = "forest_pro",
+    "General forest health" = "general_fo",
+    "Invesetment property" = "investment",
+    "Landscape aesthetic" = "landscape",
+    "Local climate regulation" = "local_clim",
+    "Local community connections" = "local_comm",
+    "Meadow health" = "meadow_hea",
+    "Public health" = "public_hea",
+    "Recreation" = "recreation",
+    "Residential property" = "residentia",
+    "Spritual" = "spiritual",
+    "Water supply" = "water_supp",
+    "Water quality" = "water_qual"
+    )
 
 benefits_tidy_sf <- benefits_sf %>% 
   pivot_longer(c(1:19), names_to = "ecosystem_benefit", values_to = "count") %>% 
@@ -62,6 +84,8 @@ tahoe_gg <- ggplot(data = benefits_tidy_sf) +
 
 tahoe_gg
 
+#plotly(tahoe_gg)
+
 benefits_tidy_sf = st_as_sf(benefits_tidy_sf)
 
 class(benefits_tidy_sf)
@@ -69,8 +93,7 @@ class(benefits_tidy_sf)
 tm_basemap("Stamen.Watercolor")
 tmap_options(check.and.fix = TRUE)
 
-tm_shape(benefits_tidy_sf) +
-  tm_polygons()
+#tm_shape(benefits_tidy_sf) + tm_polygons()
 
 ```
 
@@ -86,9 +109,9 @@ ggmap(tahoe_map) +
   
 
 
-tahoe <- tahoe_gg + ggmap(tahoe_map)
-  geom_sf(data = benefits_tidy_sf,aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan") +
-  theme_minimal()
+#tahoe <- tahoe_gg + ggmap(tahoe_map)
+  #geom_sf(data = benefits_tidy_sf,aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan") +
+  #theme_minimal()
 ```
 
 

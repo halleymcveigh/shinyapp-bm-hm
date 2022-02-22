@@ -70,6 +70,7 @@ ui <- fluidPage(theme = "tahoe.css",
                                        uiOutput("intro")
                              ))),
                   
+                  
                    # Tab 3: Ecosystem benefits
                   tabPanel("Ecosystem benefits",
                            sidebarLayout(
@@ -87,6 +88,7 @@ ui <- fluidPage(theme = "tahoe.css",
                              ) #end of mainPanel
                            ) #end of sidebarLayout
                            ),
+                  
                   
                   # Tab 4: Impacts/Risks to ecosystem services
                   tabPanel("Impacts/Risks to Ecosystem Services"),
@@ -142,7 +144,9 @@ server <- function(input, output) {
       geom_sf(aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan", alpha = 0.5) +
       theme_minimal())
   
+  
 # Tab 4:
+  
   
 # Tab 5:  
 }
