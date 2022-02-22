@@ -91,7 +91,22 @@ ui <- fluidPage(theme = "tahoe.css",
                   
                   
                   # Tab 4: Impacts/Risks to ecosystem services
-                  tabPanel("Impacts/Risks to Ecosystem Services"),
+                  tabPanel("Impacts and Risks to Ecosystem Services",
+                           sidebarLayout(
+                             sidebarPanel(
+                               checkboxGroupInput(inputId = "organization_type",
+                                                  label = "Select organization type:",
+                                                  choices = unique(summary_impacts$org_type)
+                                                  )
+                             ),
+                             mainPanel("Impacts of concern by organization type",
+                                       plotOutput(
+                                         "impacts_plot_reactive"
+                                       ),
+                                       "This figure explores the types of potential impacts to ecosystem benefits that survey respondents included.")
+                           )),
+                  
+                  
                   
                   # Tab 5: Management priority areas
                   tabPanel("Priority Management Areas")
@@ -145,8 +160,20 @@ server <- function(input, output) {
       theme_minimal())
   
   
-# Tab 4:
+# Tab 4: Impacts to ecosystem benefits
+  impacts_reactive <- reactive({
+    summary_impacts %>% 
+      filter(org_type %in% input$organization_type)
+  })
   
+  output$impacts_plot_reactive <- renderPlot(
+    ggplot(data = impacts_reactive()) +
+      geom_bar(aes(x = impacts, fill = org_type)) +
+      theme_minimal() +
+      labs(y = "Count of responses",
+           fill = "Organization type") +
+      coord_flip()
+  )
   
 # Tab 5:  
 }

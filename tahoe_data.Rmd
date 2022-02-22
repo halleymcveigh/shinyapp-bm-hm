@@ -115,6 +115,48 @@ ggmap(tahoe_map) +
 ```
 
 
+```{r}
+impacts_subset <- impacts %>% 
+  select(c(16:36)) %>% 
+  clean_names() %>% 
+  rename(
+    "Water impacts" = "water_impacts",
+    "Sedimentation" = "sedimentation",
+    "Public safety and human helth" = "public_safey_and_human_health",
+    "Loss of stored carbon" = "loss_of_stored_carbon",
+    "Loss of residential property" = "loss_of_residential_property",
+    "Loss of recreational income" = "loss_of_recreational_income",
+    "Loss of recreation opportunities" = "loss_of_recreation_opportunities",
+    "Loss of local climate regulation" = "loss_of_local_climate_regulation",
+    "Loss of landscape beauty" = "loss_of_landscape_beauty",
+    "Loss of forest products" = "loss_of_forest_products",
+    "Loss of forage or food" = "loss_of_forage_or_food",
+    "Loss of culturally or spiritually important places" = "loss_of_culturally_or_spiritually_important_places",
+    "Aquatic habitat" = "aquatic_habitat",
+    "Sedimentation" = "sedimentation",
+    "Loss of community or social connections from displacement" = "loss_of_community_or_social_connections_from_displacement",
+    "General forest loss" = "general_forest_loss",
+    "Loss of biodiversity" = "loss_of_biodiversity",
+    "Loss of commercial property or infrastructure" = "loss_of_commercial_property_or_infrastructure",
+    "Debris flow" = "debris_flow",
+    "Loss of investment property" = "loss_of_investment_property",
+    "High cost of emergency services" = "high_cost_of_emergency_services"
+  ) %>% 
+  pivot_longer(c(1:20), names_to = "impacts", values_to = "count") %>% 
+  drop_na()
+
+summary_impacts <- impacts_subset %>% 
+  group_by(impacts, org_type) %>% 
+  summarize(n = n())
+
+impacts_plot <- ggplot(data = summary_impacts) +
+  geom_bar(aes(x = impacts, fill = org_type)) +
+  coord_flip() +
+  theme_minimal()
+
+impacts_plot
+
+```
 
 
 
