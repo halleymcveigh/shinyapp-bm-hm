@@ -18,11 +18,11 @@ benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>%
   clean_names() %>% 
   select(c(14:33,40:41))
 
-impacts_sf <- read_csv(here("data", "adverse_impacts_polygons.shp")) %>% 
+impacts_sf <- read_sf(here("data", "adverse_impacts_polygons.shp")) %>% 
   clean_names() %>% 
   select(c())
 
-mgmt_sf <- read_csv(here("data", "mgmt_prioritization_polygons.shp")) %>% 
+mgmt_sf <- read_sf(here("data", "mgmt_prioritization_polygons.shp")) %>% 
   clean_names() %>% 
   select(c())
 
@@ -77,6 +77,7 @@ tahoe_gg <- ggplot(data = benefits_tidy_sf) +
 
 tahoe_gg
 
+
 #plotly(tahoe_gg)
 
 benefits_tidy_sf = st_as_sf(benefits_tidy_sf)
@@ -90,14 +91,29 @@ tmap_options(check.and.fix = TRUE)
 
 
 # Tahoe map watercolor
-tahoe_map <- get_stamenmap(bbox = c(left = -122,
-                                    bottom = 36,
-                                    right = -118,
-                                    top = 41),
+tahoe_map <- get_stamenmap(bbox = c(left = -121.5,
+                                    bottom = 38,
+                                    right = -118.5,
+                                    top = 40.5),
                            maptype = "watercolor",
                            crop = FALSE)
 ggmap(tahoe_map) +
   theme_void()
+
+# Tahoe basemap terrain
+tahoe_basemap <- get_stamenmap(bbox = c(left = -121.5,
+                                        bottom = 38,
+                                        right = -118.5,
+                                        top = 40.5),
+                               maptype = "terrain-background",
+                               crop = FALSE)
+
+# Benefits map with watercolor basemap
+ggmap(tahoe_map) +
+  geom_sf(data = benefits_tidy_sf, aes(geometry = geometry, fill = ecosystem_benefit), alpha = 0.5,
+          inherit.aes = FALSE) +
+  theme_minimal()
+
 
 
 # Impacts data wrangling
@@ -143,7 +159,14 @@ impacts_plot
 
 
 
+## Management map with terrain basemap
+mgmt_map <- ggmap(tahoe_basemap) +
+  geom_sf(data = mgmt_sf, aes(geometry = geometry), alpha = 0.5,
+          inherit.aes = FALSE) +
+  theme_minimal()
 
+mgmt_map
+ggplotly(mgmt_map)
 
 
 
