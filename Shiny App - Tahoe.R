@@ -7,8 +7,11 @@ library(sf)
 library(janitor)
 library(sp)
 library(jpeg)
+library(shinythemes)
+library(maps)
+library(mapdata)
+library(ggmap)
 
-tmap_mode("view")
 
 # Read in data for spatial analysis
 benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>% 
@@ -24,6 +27,122 @@ mgmt_sf <- read_csv(here("data", "mgmt_prioritization_polygons.shp")) %>%
   select(c())
 
 
+# Read in csv files
+benefits <- read_csv(here("data", "benefits_polygons.csv"))
+
+impacts <- read_csv(here("data", "adverse_impacts_polygons.csv"))
+
+mgmt <- read_csv(here("data", "mgmt_prioritization_polygons.csv"))
+
+
+# Wrangle benefits data
+tmap_mode("view")
+
+# Read in data for spatial analysis
+benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>% 
+  clean_names() %>% 
+  select(c(14:33,40:41)) %>% 
+  rename(
+    "Biodiversity" = "biodiversi",
+    "Carbon storage" = "carbon_sto",
+    "Commercial real estate" = "commercial",
+    "Cultural connections" = "cultural_c",
+    "Electric power generation" = "electric_p",
+    "Foraging" = "foraging_a",
+    "Forest products" = "forest_pro",
+    "General forest health" = "general_fo",
+    "Invesetment property" = "investment",
+    "Landscape aesthetic" = "landscape",
+    "Local climate regulation" = "local_clim",
+    "Local community connections" = "local_comm",
+    "Meadow health" = "meadow_hea",
+    "Public health" = "public_hea",
+    "Recreation" = "recreation",
+    "Residential property" = "residentia",
+    "Spritual" = "spiritual",
+    "Water supply" = "water_supp",
+    "Water quality" = "water_qual"
+  )
+
+benefits_tidy_sf <- benefits_sf %>% 
+  pivot_longer(c(1:19), names_to = "ecosystem_benefit", values_to = "count") %>% 
+  drop_na() %>% 
+  select(respondent = responde_1, association = responde_8, ecosystem_benefit, count, geometry)
+
+
+# Make benefits maps
+tahoe_gg <- ggplot(data = benefits_tidy_sf) +
+  geom_sf(aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan") +
+  theme_minimal()
+
+tahoe_gg
+
+#plotly(tahoe_gg)
+
+benefits_tidy_sf = st_as_sf(benefits_tidy_sf)
+
+class(benefits_tidy_sf)
+
+tm_basemap("Stamen.Watercolor")
+tmap_options(check.and.fix = TRUE)
+
+#tm_shape(benefits_tidy_sf) + tm_polygons()
+
+
+# Tahoe map watercolor
+tahoe_map <- get_stamenmap(bbox = c(left = -122,
+                                    bottom = 36,
+                                    right = -118,
+                                    top = 41),
+                           maptype = "watercolor",
+                           crop = FALSE)
+ggmap(tahoe_map) +
+  theme_void()
+
+
+# Impacts data wrangling
+impacts_subset <- impacts %>% 
+  select(c(16:36)) %>% 
+  clean_names() %>% 
+  rename(
+    "Water impacts" = "water_impacts",
+    "Sedimentation" = "sedimentation",
+    "Public safety and human helth" = "public_safey_and_human_health",
+    "Loss of stored carbon" = "loss_of_stored_carbon",
+    "Loss of residential property" = "loss_of_residential_property",
+    "Loss of recreational income" = "loss_of_recreational_income",
+    "Loss of recreation opportunities" = "loss_of_recreation_opportunities",
+    "Loss of local climate regulation" = "loss_of_local_climate_regulation",
+    "Loss of landscape beauty" = "loss_of_landscape_beauty",
+    "Loss of forest products" = "loss_of_forest_products",
+    "Loss of forage or food" = "loss_of_forage_or_food",
+    "Loss of culturally or spiritually important places" = "loss_of_culturally_or_spiritually_important_places",
+    "Aquatic habitat" = "aquatic_habitat",
+    "Sedimentation" = "sedimentation",
+    "Loss of community or social connections from displacement" = "loss_of_community_or_social_connections_from_displacement",
+    "General forest loss" = "general_forest_loss",
+    "Loss of biodiversity" = "loss_of_biodiversity",
+    "Loss of commercial property or infrastructure" = "loss_of_commercial_property_or_infrastructure",
+    "Debris flow" = "debris_flow",
+    "Loss of investment property" = "loss_of_investment_property",
+    "High cost of emergency services" = "high_cost_of_emergency_services"
+  ) %>% 
+  pivot_longer(c(1:20), names_to = "impacts", values_to = "count") %>% 
+  drop_na()
+
+summary_impacts <- impacts_subset %>% 
+  group_by(impacts, org_type) %>% 
+  summarize(n = n())
+
+impacts_plot <- ggplot(data = summary_impacts) +
+  geom_bar(aes(x = impacts, fill = org_type)) +
+  coord_flip() +
+  theme_minimal()
+
+impacts_plot
+
+
+
 
 
 
@@ -31,7 +150,7 @@ mgmt_sf <- read_csv(here("data", "mgmt_prioritization_polygons.shp")) %>%
 
 
 ###### Create the user interface
-ui <- fluidPage(theme = "tahoe.css",
+ui <- fluidPage(theme = shinytheme("darkly"),
                 titlePanel("Ecosystem Services of Interest in the Tahoe-Central Sierra Region - Blue Forest Conservation"),
                 navbarPage(
                   "Explore the Tahoe Basin",
