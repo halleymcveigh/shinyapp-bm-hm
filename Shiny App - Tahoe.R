@@ -190,11 +190,6 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                      br(),
                                      p("This application visualizes survey responses from individuals in the Tahoe-Central Sierra Region. Surveys were conducted as part of a Group Project at the Bren School."),
                                      br(),
-                                     "The map below depicts the study area.",
-                                     br(),
-                                     plotOutput
-                                     ("tahoe_map"),
-                                     br(),
                                      br())),
                  
                   # Tab 2: Ecosystem Services Overview 
@@ -251,7 +246,30 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   
                   
                   # Tab 5: Management priority areas
-                  tabPanel("Priority Management Areas")
+                  tabPanel("Priority Management Areas",
+                           sidebarLayout(
+                             sidebarPanel("View priority managment areas by management interest",
+                                          selectInput(
+                                            inputId = "management_checkbox",
+                                            label = "Select an option:",
+                                            choices = c("Wildfire management",
+                                                        "Community protection",
+                                                        "Biodiversity",
+                                                        "Forest health",
+                                                        "Restoration",
+                                                        "Prescribed burns",
+                                                        "Water quantity",
+                                                        "Headwaters",
+                                                        "Current wildfire risk",
+                                                        "High fuel load",
+                                                        "Infrastructure protection",
+                                                        "Residential property",
+                                                        "Aquatic habitat"),
+                                          ) # end of checkboxGroupInput
+                             ),
+                             mainPanel(h3("Visualization of Management Priority Areas in Region"),
+                                       plotOutput("mgmt_reactive_plot")
+                             )))
                   
                   
                 ) #end of navbarPage
@@ -263,10 +281,8 @@ server <- function(input, output) {
 
   
 # Tab 1: Introduction
-  output$tahoe_map <- renderPlot({
-    ggmap(tahoe_map) +
-      labs(title = "Tahoe-Central Sierra Region") +
-      theme_void()
+  ({
+   
   })
   
 # Tab 2: Ecosystem Service Overview
@@ -297,8 +313,8 @@ server <- function(input, output) {
   }) #end sw_reactive
   
   output$eco_ben_reactive_plot <- renderPlot(
-    ggplot(data = eco_ben_reactive()) +
-      geom_sf(aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan", alpha = 0.5) +
+    ggmap(tahoe_map) +
+      geom_sf(data = eco_ben_reactive(), aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan", alpha = 0.5, inherit.aes = FALSE) +
       theme_minimal())
   
   
@@ -317,8 +333,18 @@ server <- function(input, output) {
       coord_flip()
   )
   
-# Tab 5:  
-}
+# Tab 5:  Management priority areas
+  mgmt_reactive <- reactive({
+    mgmt_tidy_sf %>% 
+      filter(management_concern %in% input$management_checkbox)
+  }) #end sw_reactive
+  
+  output$mgmt_reactive_plot <- renderPlot(
+    ggmap(tahoe_basemap) +
+      geom_sf(data = mgmt_reactive(), aes(geometry = geometry, fill = management_concern), alpha = 0.5, inherit.aes = FALSE) +
+      theme_minimal())
+  
+  }
 
 
 

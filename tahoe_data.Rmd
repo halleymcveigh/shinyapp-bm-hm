@@ -27,6 +27,9 @@ benefits <- read_csv(here("data", "benefits_polygons.csv"))
 impacts <- read_csv(here("data", "adverse_impacts_polygons.csv"))
 
 mgmt <- read_csv(here("data", "mgmt_prioritization_polygons.csv"))
+
+mgmt_tidy <- mgmt %>% 
+  drop_na()
 ```
 
 
@@ -98,20 +101,62 @@ tmap_options(check.and.fix = TRUE)
 ```
 
 ```{r}
-tahoe_map <- get_stamenmap(bbox = c(left = -122,
-                                    bottom = 36,
-                                    right = -118,
-                                    top = 41),
+tahoe_map <- get_stamenmap(bbox = c(left = -121.5,
+                                    bottom = 38,
+                                    right = -118.5,
+                                    top = 40.5),
                            maptype = "watercolor",
                            crop = FALSE)
 ggmap(tahoe_map) +
   theme_void()
   
 
+## benefits map
+ggmap(tahoe_map) +
+  geom_sf(data = benefits_tidy_sf, aes(geometry = geometry, fill = ecosystem_benefit), alpha = 0.5,
+          inherit.aes = FALSE) +
+  theme_minimal()
 
-#tahoe <- tahoe_gg + ggmap(tahoe_map)
-  #geom_sf(data = benefits_tidy_sf,aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan") +
-  #theme_minimal()
+tahoe_basemap <- get_stamenmap(bbox = c(left = -121.5,
+                                    bottom = 38,
+                                    right = -118.5,
+                                    top = 40.5),
+                           maptype = "terrain-background",
+                           crop = FALSE)
+
+
+
+## Wrangling management sf data
+
+mgmt_tidy_sf <- mgmt_sf %>% 
+  rename(
+    "Wildfire management" = "wildfire.m",
+    "Community protection" = "community",
+    "Biodiversity" = "biodiversi",
+    "Forest health" = "forest.hea",
+    "Restoration" = "restoratio",
+    "Prescribed burns" = "prescribed",
+    "Water quantity" = "water.quan",
+    "Headwaters" = "headwaters",
+    "Current wildfire risk" = "current.wi",
+    "High fuel load" = "current.hi",
+    "Infrastructure protection" = "infrastruc",
+    "Residential property" = "residentia",
+    "Aquatic habitat" = "aquatic.ha"
+    ) %>% 
+  pivot_longer(c(1:13), names_to = "management_concern", values_to = "count") %>% 
+  drop_na()
+
+## management map
+mgmt_map <- ggmap(tahoe_basemap) +
+  geom_sf(data = mgmt_sf, aes(geometry = geometry), alpha = 0.5,
+          inherit.aes = FALSE) +
+  theme_minimal()
+
+mgmt_map
+ggplotly(mgmt_map)
+
+
 ```
 
 
@@ -158,6 +203,25 @@ impacts_plot
 
 ```
 
+
+## Management priority areas
+```{r}
+mgmt_tidy
+
+mgmt_sf <- read_sf(here("data", "mgmt_prioritization_polygons.dbf")) %>% 
+  select(c(13:26,33))
+
+mgmt_plot <- ggplot(data = mgmt_sf) +
+  geom_sf(aes(geometry = geometry), color = "darkcyan", alpha = .5) +
+  theme_minimal()
+
+mgmt_plot 
+
+plotly(mgmt_plot)
+
+plot(mgmt_sf)
+  
+```
 
 
 
