@@ -96,7 +96,7 @@ class(benefits_tidy_sf)
 tm_basemap("Stamen.Watercolor")
 tmap_options(check.and.fix = TRUE)
 
-#tm_shape(benefits_tidy_sf) + tm_polygons()
+tm_shape(benefits_tidy_sf) + tm_polygons(col = "ecosystem_benefit")
 
 ```
 
@@ -127,6 +127,8 @@ tahoe_basemap <- get_stamenmap(bbox = c(left = -121.5,
 
 
 ## Wrangling management sf data
+mgmt_sf <- read_sf(here("data", "mgmt_prioritization_polygons.dbf")) %>% 
+  select(c(13:26,33))
 
 mgmt_tidy_sf <- mgmt_sf %>% 
   rename(
@@ -145,11 +147,14 @@ mgmt_tidy_sf <- mgmt_sf %>%
     "Aquatic habitat" = "aquatic.ha"
     ) %>% 
   pivot_longer(c(1:13), names_to = "management_concern", values_to = "count") %>% 
-  drop_na()
+  filter(count >= 1)
+  #drop_na()
+
+class(mgmt_tidy_sf)
 
 ## management map
 mgmt_map <- ggmap(tahoe_basemap) +
-  geom_sf(data = mgmt_sf, aes(geometry = geometry), alpha = 0.5,
+  geom_sf(data = mgmt_tidy_sf, aes(geometry = geometry, fill = management_concern), alpha = 0.5,
           inherit.aes = FALSE) +
   theme_minimal()
 
@@ -208,8 +213,7 @@ impacts_plot
 ```{r}
 mgmt_tidy
 
-mgmt_sf <- read_sf(here("data", "mgmt_prioritization_polygons.dbf")) %>% 
-  select(c(13:26,33))
+
 
 mgmt_plot <- ggplot(data = mgmt_sf) +
   geom_sf(aes(geometry = geometry), color = "darkcyan", alpha = .5) +
@@ -217,7 +221,7 @@ mgmt_plot <- ggplot(data = mgmt_sf) +
 
 mgmt_plot 
 
-plotly(mgmt_plot)
+#plotly(mgmt_plot)
 
 plot(mgmt_sf)
   

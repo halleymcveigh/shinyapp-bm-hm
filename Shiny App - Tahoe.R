@@ -22,9 +22,8 @@ impacts_sf <- read_sf(here("data", "adverse_impacts_polygons.shp")) %>%
   clean_names() %>% 
   select(c())
 
-mgmt_sf <- read_sf(here("data", "mgmt_prioritization_polygons.shp")) %>% 
-  clean_names() %>% 
-  select(c())
+mgmt_sf <- read_sf(here("data", "mgmt_prioritization_polygons.dbf")) %>% 
+  select(c(13:26,33))
 
 
 # Read in csv files
@@ -158,15 +157,36 @@ impacts_plot <- ggplot(data = summary_impacts) +
 impacts_plot
 
 
+## Wrangling management sf data
+
+mgmt_tidy_sf <- mgmt_sf %>% 
+  rename(
+    "Wildfire management" = "wildfire.m",
+    "Community protection" = "community",
+    "Biodiversity" = "biodiversi",
+    "Forest health" = "forest.hea",
+    "Restoration" = "restoratio",
+    "Prescribed burns" = "prescribed",
+    "Water quantity" = "water.quan",
+    "Headwaters" = "headwaters",
+    "Current wildfire risk" = "current.wi",
+    "High fuel load" = "current.hi",
+    "Infrastructure protection" = "infrastruc",
+    "Residential property" = "residentia",
+    "Aquatic habitat" = "aquatic.ha"
+  ) %>% 
+  pivot_longer(c(1:13), names_to = "management_concern", values_to = "count") %>% 
+  filter(count >= 1) 
+  #drop_na()
 
 ## Management map with terrain basemap
 mgmt_map <- ggmap(tahoe_basemap) +
-  geom_sf(data = mgmt_sf, aes(geometry = geometry), alpha = 0.5,
+  geom_sf(data = mgmt_tidy_sf, aes(geometry = geometry), alpha = 0.5,
           inherit.aes = FALSE) +
   theme_minimal()
 
 mgmt_map
-ggplotly(mgmt_map)
+#ggplotly(mgmt_map)
 
 
 
@@ -335,8 +355,11 @@ server <- function(input, output) {
   
 # Tab 5:  Management priority areas
   mgmt_reactive <- reactive({
-    mgmt_tidy_sf %>% 
+    message("if management_checkbox is selected", input$management_checkbox)
+    x <- mgmt_tidy_sf %>% 
       filter(management_concern %in% input$management_checkbox)
+    print(class(x))
+    return(x)
   }) #end sw_reactive
   
   output$mgmt_reactive_plot <- renderPlot(
