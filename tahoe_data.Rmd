@@ -194,7 +194,7 @@ impacts_subset <- impacts %>%
   ) %>% 
   pivot_longer(c(1:20), names_to = "impacts", values_to = "count") %>% 
   drop_na()
-
+ 
 summary_impacts <- impacts_subset %>% 
   group_by(impacts, org_type) %>% 
   summarize(n = n())

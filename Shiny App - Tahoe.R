@@ -232,15 +232,16 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   tabPanel("Ecosystem benefits",
                            sidebarLayout(
                              sidebarPanel(
-                               "WIDGET 1",
+                               "Benefits Received",
                                checkboxGroupInput(inputId = "ecosystem_service",
                                                   label = "Select ecosystem service:",
                                                   choices = unique(benefits_tidy_sf$ecosystem_benefit)
                                                   ) # end checkboxGroupInput
                              ), #end of sidebarPanel
-                             mainPanel(
-                               "The Tahoe-Central Sierra region is a diverse landscape that covers approximately 2.4 million acres of land, multiple National Forests, Wildernesses, cities and cities. The region is rich in diversity, but under threat from climate change impacts. This study sought to determine specific stakeholder interest in various ecosystem services to better prioritize how to protect these services under changing climate and future management scenarios...
-                               Description of how participants were asked to identify regions of interest within our study region",
+                             mainPanel(h3("Ecosystem Services Benefits"),
+                                       br(),
+                                       p("The Tahoe-Central Sierra region is a diverse landscape that covers approximately 2.4 million acres of land, multiple National Forests, Wildernesses, recreational opportunities and cities. The region is rich in diversity, but under threat from climate change impacts. This study sought to determine specific stakeholder interest in various ecosystem services to better prioritize how to protect these services under changing climate and future management scenarios. Participants were invited to participate in an interview which incorporated the use of a participatory GIS mapping tool, called Maptionnaire. Participants would be asked a series of questions about the benefits and risks to benefits they perceive within the study region. They were then asked to identify where and which benefits matter to them by drawing a polygon and describing each benefit received in this polygon."),
+                                       br(),
                                plotOutput("eco_ben_reactive_plot")
                              ) #end of mainPanel
                            ) #end of sidebarLayout
@@ -256,7 +257,10 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                                   choices = unique(summary_impacts$org_type)
                                                   )
                              ),
-                             mainPanel("Impacts of concern by organization type",
+                             mainPanel(h3("Impacts of Concern by Organization Type"),
+                                       br(),
+                                       p("Participants were asked to identify the greatest impacts that would impact their organizations mission. The impacts listed below might prove helpful to better prioritize forest restoration where specific impact outcomes could be mitigated."),
+                                       br(),
                                        plotOutput(
                                          "impacts_plot_reactive"
                                        ),
@@ -288,6 +292,9 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                           ) # end of checkboxGroupInput
                              ),
                              mainPanel(h3("Visualization of Management Priority Areas in Region"),
+                                       br(),
+                                       p("Participants were asked to draw polygons where their organization would prioritize forest management and restoration activities to secure ecosystem service benefits. Unsurpisingly, most participants highlighted regions that are immediate concern to their organization or its stakeholders. These interviews did provide interesting insights into where local stakeholders believe forest management is severely lacking. Individuals highlighted there reasons for highlighting specific polygons on the map."),
+                                       br(),
                                        plotOutput("mgmt_reactive_plot")
                              )))
                   
