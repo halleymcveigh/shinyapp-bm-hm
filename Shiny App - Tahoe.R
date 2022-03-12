@@ -25,6 +25,7 @@ impacts_sf <- read_sf(here("data", "adverse_impacts_polygons.shp")) %>%
 mgmt_sf <- read_sf(here("data", "mgmt_prioritization_polygons.dbf")) %>% 
   select(c(13:26,33))
 
+tcsi_boundary_sf <- read_sf(here("data", "study_region_boundary.shp"))
 
 # Read in csv files
 benefits <- read_csv(here("data", "benefits_polygons.csv"))
@@ -33,6 +34,10 @@ impacts <- read_csv(here("data", "adverse_impacts_polygons.csv"))
 
 mgmt <- read_csv(here("data", "mgmt_prioritization_polygons.csv"))
 
+
+# Wrangle the TCSI AOI boundary
+ggplot() +
+  geom_sf(data = tcsi_boundary_sf, col = "red", alpha=0, size =1)
 
 # Wrangle benefits data
 tmap_mode("view")
@@ -206,6 +211,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                      br(),
                                      img(src = "TCSI_Study_Area.png", height = 650, width = 450),
                                      br(),
+                                     br(),
                                      p("To achieve this goal, the students conducted a survey and participatory GIS mapping activities with stakeholder organizations within the TCSI region. Participants indicated the ecosystem service benefits that their organization values most, the impacts to ecosystem services that would be detrimental to their organization’s mission and how to prioritize management to ensure wildfire risk reductions do not jeopardize their interests in the area."),
                                      br(),
                                      p("This application visualizes survey responses from individuals in the Tahoe-Central Sierra Region. Surveys were conducted as part of a Group Project at the Bren School."),
@@ -342,7 +348,9 @@ server <- function(input, output) {
   output$eco_ben_reactive_plot <- renderPlot(
     ggmap(tahoe_map) +
       geom_sf(data = eco_ben_reactive(), aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan", alpha = 0.5, inherit.aes = FALSE) +
+      scale_fill_discrete(name = "Ecosystem Benefit") +
       theme_minimal())
+    
   
   
 # Tab 4: Impacts to ecosystem benefits
@@ -372,7 +380,8 @@ server <- function(input, output) {
   output$mgmt_reactive_plot <- renderPlot(
     ggmap(tahoe_basemap) +
       geom_sf(data = mgmt_reactive(), aes(geometry = geometry, fill = management_concern), alpha = 0.5, inherit.aes = FALSE) +
-      theme_minimal())
+      theme_minimal() +
+      scale_fill_discrete(name = "Management Priority"))
   
   }
 

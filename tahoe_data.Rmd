@@ -30,6 +30,8 @@ mgmt <- read_csv(here("data", "mgmt_prioritization_polygons.csv"))
 
 mgmt_tidy <- mgmt %>% 
   drop_na()
+
+
 ```
 
 
@@ -74,6 +76,26 @@ benefits_tidy_sf <- benefits_sf %>%
 
 ```
 
+### Fiddle with the TCSI Boundary
+
+```{r}
+tcsi_boundary_sf <- read_sf(here("data", "study_region_boundary.shp"))
+
+tcsi_boundary_sf %>% st_crs()
+```
+
+```{r}
+tcsi <- ggplot() +
+  geom_sf(data = tcsi_boundary_sf, col = "red", alpha=0, size =1)
+```
+
+```{r}
+tcsi
+
+
+```
+
+
 ### Examine and set CRS
 ```{r}
 benefits_sf %>% st_crs()
@@ -85,7 +107,8 @@ tahoe_gg <- ggplot(data = benefits_tidy_sf) +
   geom_sf(aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan") +
   theme_minimal()
 
-tahoe_gg
+tahoe_gg + tcsi
+
 
 #plotly(tahoe_gg)
 
@@ -107,7 +130,7 @@ tahoe_map <- get_stamenmap(bbox = c(left = -121.5,
                                     top = 40.5),
                            maptype = "watercolor",
                            crop = FALSE)
-ggmap(tahoe_map) +
+ggmap(tahoe_map) + ggmap(tcsi)
   theme_void()
   
 
