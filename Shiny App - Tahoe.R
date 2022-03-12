@@ -349,7 +349,8 @@ server <- function(input, output) {
     ggmap(tahoe_map) +
       geom_sf(data = eco_ben_reactive(), aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan", alpha = 0.5, inherit.aes = FALSE) +
       scale_fill_discrete(name = "Ecosystem Benefit") +
-      theme_minimal())
+      theme_minimal() +
+      geom_sf(data = tcsi_boundary_sf, col = "red", fill = NA, inherit.aes = FALSE))
     
   
   
@@ -381,8 +382,8 @@ server <- function(input, output) {
     ggmap(tahoe_basemap) +
       geom_sf(data = mgmt_reactive(), aes(geometry = geometry, fill = management_concern), alpha = 0.5, inherit.aes = FALSE) +
       theme_minimal() +
-      scale_fill_discrete(name = "Management Priority"))
-  
+      scale_fill_discrete(name = "Management Priority") +
+    geom_sf(data = tcsi_boundary_sf, col = "red", fill = NA, inherit.aes = FALSE))
   }
 
 

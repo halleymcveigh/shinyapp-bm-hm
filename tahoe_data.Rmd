@@ -107,7 +107,7 @@ tahoe_gg <- ggplot(data = benefits_tidy_sf) +
   geom_sf(aes(geometry = geometry, fill = ecosystem_benefit), color = "darkcyan") +
   theme_minimal()
 
-tahoe_gg + tcsi
+tahoe_gg
 
 
 #plotly(tahoe_gg)
@@ -119,7 +119,7 @@ class(benefits_tidy_sf)
 tm_basemap("Stamen.Watercolor")
 tmap_options(check.and.fix = TRUE)
 
-tm_shape(benefits_tidy_sf) + tm_polygons(col = "ecosystem_benefit")
+tm_shape(benefits_tidy_sf) + tm_polygons(col = "ecosystem_benefit") +
 
 ```
 
@@ -130,9 +130,9 @@ tahoe_map <- get_stamenmap(bbox = c(left = -121.5,
                                     top = 40.5),
                            maptype = "watercolor",
                            crop = FALSE)
-ggmap(tahoe_map) + ggmap(tcsi)
+ggmap(tahoe_map)
   theme_void()
-  
+
 
 ## benefits map
 ggmap(tahoe_map) +
