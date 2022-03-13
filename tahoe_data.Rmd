@@ -55,7 +55,7 @@ benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>%
     "Foraging" = "foraging_a",
     "Forest products" = "forest_pro",
     "General forest health" = "general_fo",
-    "Invesetment property" = "investment",
+    "Investment property" = "investment",
     "Landscape aesthetic" = "landscape",
     "Local climate regulation" = "local_clim",
     "Local community connections" = "local_comm",
@@ -66,12 +66,18 @@ benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>%
     "Spritual" = "spiritual",
     "Water supply" = "water_supp",
     "Water quality" = "water_qual"
-    )
+    ) %>% 
+  subset(select = (-c(3,5,9,16)))
+
+class(benefits_sf)
+tm_shape(benefits_sf) +
+  tm_polygons(col = "Biodiversity")
 
 benefits_tidy_sf <- benefits_sf %>% 
-  pivot_longer(c(1:19), names_to = "ecosystem_benefit", values_to = "count") %>% 
-  drop_na() %>% 
+  pivot_longer(c(1:15), names_to = "ecosystem_benefit", values_to = "count") %>% 
+  filter(count >= 1) %>% 
   select(respondent = responde_1, association = responde_8, ecosystem_benefit, count, geometry)
+#drop_na()
 
 
 ```
@@ -100,6 +106,8 @@ tcsi
 ```{r}
 benefits_sf %>% st_crs()
 
+benefits_tidy_sf %>% st_crs()
+
 ```
 
 ```{r}
@@ -119,7 +127,7 @@ class(benefits_tidy_sf)
 tm_basemap("Stamen.Watercolor")
 tmap_options(check.and.fix = TRUE)
 
-tm_shape(benefits_tidy_sf) + tm_polygons(col = "ecosystem_benefit") +
+tm_shape(benefits_tidy_sf) + tm_polygons(col = "ecosystem_benefit")
 
 ```
 
@@ -222,8 +230,9 @@ summary_impacts <- impacts_subset %>%
   group_by(impacts, org_type) %>% 
   summarize(n = n())
 
+
 impacts_plot <- ggplot(data = summary_impacts) +
-  geom_bar(aes(x = impacts, fill = org_type)) +
+  geom_col(aes(x = org_type, y = n, fill = impacts)) +
   coord_flip() +
   theme_minimal()
 

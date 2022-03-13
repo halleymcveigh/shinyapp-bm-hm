@@ -11,6 +11,7 @@ library(shinythemes)
 library(maps)
 library(mapdata)
 library(ggmap)
+library(shinyWidgets)
 
 
 # Read in data for spatial analysis
@@ -55,7 +56,7 @@ benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>%
     "Foraging" = "foraging_a",
     "Forest products" = "forest_pro",
     "General forest health" = "general_fo",
-    "Invesetment property" = "investment",
+    "Investment property" = "investment",
     "Landscape aesthetic" = "landscape",
     "Local climate regulation" = "local_clim",
     "Local community connections" = "local_comm",
@@ -66,10 +67,11 @@ benefits_sf <- read_sf(here("data", "benefits_polygons.shp")) %>%
     "Spritual" = "spiritual",
     "Water supply" = "water_supp",
     "Water quality" = "water_qual"
-  )
+  ) %>% 
+  subset(select = (-c(3,5,9,16)))
 
 benefits_tidy_sf <- benefits_sf %>% 
-  pivot_longer(c(1:19), names_to = "ecosystem_benefit", values_to = "count") %>% 
+  pivot_longer(c(1:15), names_to = "ecosystem_benefit", values_to = "count") %>% 
   drop_na() %>% 
   select(respondent = responde_1, association = responde_8, ecosystem_benefit, count, geometry)
 
@@ -258,7 +260,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   tabPanel("Impacts and Risks to Ecosystem Services",
                            sidebarLayout(
                              sidebarPanel(
-                               checkboxGroupInput(inputId = "organization_type",
+                               checkboxGroupButtons(inputId = "organization_type",
                                                   label = "Select organization type:",
                                                   choices = unique(summary_impacts$org_type)
                                                   )
@@ -383,7 +385,7 @@ server <- function(input, output) {
   
   output$impacts_plot_reactive <- renderPlot(
     ggplot(data = impacts_reactive()) +
-      geom_bar(aes(x = impacts, fill = org_type)) +
+      geom_col(aes(x = impacts, y = n, fill = org_type)) +
       theme_minimal() +
       labs(y = "Count of responses",
            fill = "Organization type") +
