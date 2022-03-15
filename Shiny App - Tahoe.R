@@ -207,7 +207,7 @@ mgmt_map
 ui <- fluidPage(theme = shinytheme("darkly"),
                 titlePanel("Ecosystem Services of Interest in the Tahoe-Central Sierra Region - Blue Forest Conservation"),
                 navbarPage(
-                  "Explore the Tahoe Basin",
+                  "Explore the Study Area",
                   
                   # Tab 1: Introduction
                   tabPanel("Overview",
