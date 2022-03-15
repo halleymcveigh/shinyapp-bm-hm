@@ -12,6 +12,7 @@ library(maps)
 library(mapdata)
 library(ggmap)
 library(shinyWidgets)
+library(stringr)
 
 
 # Read in data for spatial analysis
