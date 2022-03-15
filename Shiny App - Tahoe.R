@@ -301,7 +301,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                              ),
                              mainPanel(h3("Visualization of Management Priority Areas in Region"),
                                        br(),
-                                       p("Participants were asked to draw polygons where their organization would prioritize forest management and restoration activities to secure ecosystem service benefits. Unsurpisingly, most participants highlighted regions that are immediate concern to their organization or its stakeholders. These interviews did provide interesting insights into where local stakeholders believe forest management is severely lacking. Individuals highlighted there reasons for highlighting specific polygons on the map."),
+                                       p("Participants were asked to draw polygons where their organization would prioritize forest management and restoration activities to secure ecosystem service benefits. Unsurpisingly, most participants highlighted regions that are of immediate concern to their organization or its stakeholders. These interviews did provide interesting insights into where local stakeholders believe forest management is severely lacking. Individuals highlighted their reasons for identifying specific polygons on the map."),
                                        br(),
                                        plotOutput("mgmt_reactive_plot")
                              ))),
