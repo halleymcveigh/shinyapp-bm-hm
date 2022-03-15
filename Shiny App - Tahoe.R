@@ -12,7 +12,6 @@ library(maps)
 library(mapdata)
 library(ggmap)
 library(shinyWidgets)
-library(stringr)
 
 
 # Read in data for spatial analysis
@@ -153,15 +152,12 @@ impacts_subset <- impacts %>%
   pivot_longer(c(1:20), names_to = "impacts", values_to = "count") %>% 
   drop_na()
 
-impacts_subset$Organization = str_to_title(impacts_subset$org_type)
-
 summary_impacts <- impacts_subset %>% 
-  group_by(impacts, Organization) %>% 
+  group_by(impacts, org_type) %>% 
   summarize(n = n())
 
-
 impacts_plot <- ggplot(data = summary_impacts) +
-  geom_col(aes(x = Organization, y = n, fill = impacts)) +
+  geom_bar(aes(x = impacts, fill = org_type)) +
   coord_flip() +
   theme_minimal()
 
@@ -188,7 +184,7 @@ mgmt_tidy_sf <- mgmt_sf %>%
   ) %>% 
   pivot_longer(c(1:13), names_to = "management_concern", values_to = "count") %>% 
   filter(count >= 1) 
-
+  #drop_na()
 
 ## Management map with terrain basemap
 mgmt_map <- ggmap(tahoe_basemap) +
@@ -222,9 +218,6 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                      br(),
                                      p("This application visualizes survey responses from individuals in the Tahoe-Central Sierra Region. Surveys were conducted as part of a Group Project at the Bren School."),
                                      br(),
-                                     br(),
-                                     br(),
-                                     p("Created by Brendan McGovern and Halley McVeigh. March 2022."),
                                      br())),
                  
                   # Tab 2: Ecosystem Services Overview 
@@ -234,7 +227,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                           selectInput(
                                             inputId = "ecosystem_services_checkbox",
                                             label = "Select an option:",
-                                            choices = c("Biodiversity", "Carbon Storage", "Climate Regulation", "General Forest Health", "Meadow Health", "Recreation and Cultural Connections", "Watershed Services", "Water"),
+                                            choices = c("Biodiversity", "Carbon Storage", "Climate Regulation", "General Forest Health", "Foraging", "Forest Products", "Meadow Health", "Public Health", "Recreation and Cultural Connections", "Watershed Services", "Water"),
                                           ) # end of checkboxGroupInput
                              ),
                              mainPanel(h3("Overview of Ecosystem Services in Region"),
@@ -269,7 +262,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                              sidebarPanel(
                                checkboxGroupButtons(inputId = "organization_type",
                                                   label = "Select organization type:",
-                                                  choices = unique(summary_impacts$Organization)
+                                                  choices = unique(summary_impacts$org_type)
                                                   )
                              ),
                              mainPanel(h3("Impacts of Concern by Organization Type"),
@@ -308,7 +301,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                              ),
                              mainPanel(h3("Visualization of Management Priority Areas in Region"),
                                        br(),
-                                       p("Participants were asked to draw polygons where their organization would prioritize forest management and restoration activities to secure ecosystem service benefits. Unsurpisingly, most participants highlighted regions that are of immediate concern to their organization or its stakeholders. These interviews did provide interesting insights into where local stakeholders believe forest management is severely lacking. Individuals highlighted their reasons for identifying specific polygons on the map."),
+                                       p("Participants were asked to draw polygons where their organization would prioritize forest management and restoration activities to secure ecosystem service benefits. Unsurpisingly, most participants highlighted regions that are immediate concern to their organization or its stakeholders. These interviews did provide interesting insights into where local stakeholders believe forest management is severely lacking. Individuals highlighted there reasons for highlighting specific polygons on the map."),
                                        br(),
                                        plotOutput("mgmt_reactive_plot")
                              ))),
@@ -323,12 +316,19 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                      br(),
                                      p("Manley, P., Wilson, K., & Povak, N. (2020). Framework for Promoting Socio-ecological Resilience Across Forested Landscapes in the Sierra Nevada."),
                                      br(),
+                                     p("Millennium Ecosystem Assessment (Program). 2005. Ecosystems and human well-being. Washington, D.C.: Island Press."),
+                                     br(),
                                      p("Murphy, D.D., Fleishman, E, & Stine, P.A. (2004). Biodiversity in the Sierra Nevada. Proceedings of the Sierra Nevada Science Symposium. Gen. Tech. Rep. PSW-GTR-193. Albany, CA: Pacific Southwest Research Station, Forest Service, U.S. Department of Agriculture: 167-174. Accessed: https://www.fs.fed.us/psw/publications/documents/psw_gtr193/psw_gtr193_5_1_Murphy_Fleishman_Stine.pdf"),
+                                     br(),
+                                     p("Sorvino, Chloe. May 14,2018. A Billion-Dollar Fortune from Timber and Fire. Forbes Magazine"),
                                      br(),
                                      p("URban Biodiversity and Ecosystem Services. 2015. Accessed: https://www.iucn.org/downloads/urbes_factsheet_08_web_1.pdf."),
                                      br(),
+                                     p("USDA Forest Service. N.d. Why does the Forest Service permit livestock grazing on National Forest System lands?"),
+                                     br(),
                                      p("Tate, Ken. 2011. Mountain Meadow Function and Ecosystem Services. UC Davis Center for Watershed Sciences. Accessed: https://ucanr.edu/sites/UCCE-Plumas-Sierra/files/77872.pdf"),
-                                     br()))
+                                     br())
+                           )
                 ) #end of navbarPage
                 ) #end ui
 
@@ -348,7 +348,10 @@ server <- function(input, output) {
     input$ecosystem_services_checkbox == "Carbon Storage" ~ "Forest systems are critical for carbon uptake and climate change mitigation. Carbon sequestration, or the capture and storage of carbon dioxide from the atmosphere (Manley et al., 2020), plays a significant role in forest ecology both as a source and sink of carbon dioxide. Through photosynthesis, chlorophyll in the leaves of trees capture CO₂ and reduce its concentration in the atmosphere. However, due to human activities such as deforestation this stored carbon is ultimately released into the atmosphere, reversing the beneficial effects that forest ecosystems provide. It is estimated that the benefits provided from carbon sequestration equates to about $65 per ton, totaling $3.4 billion annually in the U.S (Krieger, 2001).",
     input$ecosystem_services_checkbox == "Climate Regulation" ~ "Forests regulate climate at local, regional, and continental scales, by producing atmospheric moisture and rainfall, and controlling temperature. Forests provide multiple water and climate-related services, including precipitation recycling, cooling, water purification, infiltration, and groundwater recharge. Forest clearing may have several effects on water supply, however. Less trees means less water is being evaporated and more groundwater feeds as stream flow into water supplies downstream. Loss of tree cover promotes soil degradation that reduces soil infiltration and water retention capacity, and in turn reduces groundwater reserves that maintain dry season base flows. For all the reasons noted above, transpiration, interception, evaporation, infiltration and groundwater recharge, tree cover can either store or recycle substantial amounts of water downwind, providing a positive impact on (and protection of) the local catchment, thereby moderating floods. Mixed species forests are more effective in regulating water supplies and moderating floods than monocultures. Through variation in rooting depth, strength and pattern, different species may aid each other through water uptake, water infiltration and erosion control. These services may be far more important, and are often underrated, when compared with traditional benefits such as food, fuel and fiber, and carbon storage. In addition, these services benefit and impact people well beyond the local or catchment scale, often far from where actual decisions on tree planting or removal are made (Ellison et al. 2017).",
     input$ecosystem_services_checkbox == "General Forest Health" ~ "Forest Health refers to the overall state and function of a forest. This refers to the state of a forest and tends to include numerous ecosystem services that are otherwise defined separately. The overall health of a forest ensures the provisioning of numerous other ecosystem services, such as water quantity and quality, carbon sequestration, and biodiversity. ",
+    input$ecosystem_services_checkbox == "Foraging" ~ "Forage is the food available for wildlife and livestock on a given landscape.  Historically, Ranchers have grazed sheep and cattle within the Tahoe-Central Sierra region since the Gold Rush-era. By late spring, as lower elevation forage dried, ranchers would seek higher elevation meadows and valleys to feed their livestock. Such practices are regulated on National Forest System lands by the U.S. Forest Service, where the agency manages the resources through permits, controls on herd size, allotments, and season of use (USDA Forest Service).",
+    input$ecosystem_services_checkbox == "Forest Products" ~ "Forests are also the source of ecosystem services that are conventionally associated with economic value, here called resources. These resources include jobs, timber, and other economic goods that can be harvested from forests. Jobs associated with recreation are described in the recreation section above. Other industries that provide jobs in forests include fire prevention and fighting, restoration, and timber. Sierra Pacific Industries (SPI), the fourth largest lumber producer and third largest landowner in the United States, generates annual profits of approximately $375 million on lands in California, Washington, and Oregon (Sorvino 2018). For the logging industry, the fire issue is complicated; while SPI owns unburned forest which they manage for timber and desire to protect, they also profit from salvage logging of burned trees post-fire (Sorvino 2018).",
     input$ecosystem_services_checkbox == "Meadow Health" ~ "Meadows represent a small portion of the landscape across the TCSI but provide a number of critical services within the region. Meadows filter pollutants in runoff, provide habitat for unique plants and animals, grow forage, sequester carbon and other nutrients, and provide critical floodplains to absorb storm and high flows. Loss of forest meadows result in increases in rates of erosion, sediment generation, reductions in filtration of nutrients and sediment, a lowered water table and channelized flow to name a few (Tate, 2011).",
+    input$ecosystem_services_checkbox == "Public Health" ~ "The Millennium Ecosystem Assessment Report (2005) identified freshwater, food, raw materials, medicines, nutrient cycling, wastewater treatment, regulation of infectious disease and climate, cultural and recreational activities as the main ecosystem services linked to public health. Recreational ecosystem services have a direct impact on mental and physical health because people enjoy spending time outdoors relaxing or participating in activities (eg, fishing, swimming, boating, etc.) in healthy ecosystems. Food, clean air, freshwater, medicine, and the regulation of diseases are services that minimize threats to human health.",
     input$ecosystem_services_checkbox == "Recreation and Cultural Connections" ~ "Forests provide many recreational opportunities, including but not limited to hiking, tourism, hunting and fishing, and ski and winter sports activities. It is estimated that recreational activities associated with national forest alone contribute to roughly $110 billion annually in the U.S. (Krieger, 2001). There is also value attached to forests in terms of their longevity and knowing that they will provide value in the future. Additionally, the Tahoe-Central Sierra region is the ancestral and current home of the Washoe and Nisenan tribes and are of great cultural value to these communities. While recreational services are easier to measure through economic analyses and outcomes, it is more difficult to characterize cultural ecosystem services (CES). These services are the non-material benefits people obtain from nature. They include recreation, aesthetic enjoyment, physical and mental health benefits, and spiritual experiences. They contribute to a sense of place, foster social cohesion and are essential for human health and well-being. Although everyone benefits from CES, their impact on urban life is mostly intangible, and as a result difficult to measure and quantify. Given their connections to human emotion, deep meaning, fulfilment, and motivation, they are also crucial for human well-being (URBES, 2015). Additionally, the Tahoe-Central Sierra region is the ancestral and current home of the Washoe and Nisenan tribes, and are of great cultural value to these communities.",
     input$ecosystem_services_checkbox == "Watershed Services" ~ "Forest watersheds trap and store water underground, contributing to the amount of freshwater available across the globe. Forests help purify water by filtering contaminants and other chemicals through their root systems (Manley et al., 2020). Water is required for all forms of life; thus, it is important to protect the ecosystems that maintain our water availability and purity. Water flowing from forested watersheds is commonly utilized in many industries such as agriculture, electricity, and municipal water supplies. Water sourced from forest lands are estimated to be valued at around $0.26/acre-foot for electrical use to $50/acre-foot for irrigation and municipal use (Krieger, 2001).",
     input$ecosystem_services_checkbox == "Water" ~ "Water quantity and water quality are important ecosystem benefits not only to stakeholders within the TCSI, but users downstream and the environment. Water plays a critical role in providing needed habitat for aquatic species. Photo Credit: Larry Miller, CC BY-SA 2.0.")
@@ -362,8 +365,10 @@ server <- function(input, output) {
     else if (input$ecosystem_services_checkbox == "Carbon Storage"){img(src= "carbon_storage.jpeg", height="50%", width="50%", align="left")}
     else if (input$ecosystem_services_checkbox == "Climate Regulation"){img(src= "climate_regulation.jpeg", height="50%", width="50%", align="left")}
     else if (input$ecosystem_services_checkbox == "General Forest Health"){img(src= "general_forest_health.jpeg", height="50%", width="50%", align="left")}
+    else if (input$ecosystem_services_checkbox == "Foraging"){img(src= "foraging_cattle.jpeg", height="50%", width="50%", align="left")}
+    else if (input$ecosystem_services_checkbox == "Forest Products"){img(src= "timber_product.jpeg", height="50%", width="50%", align="left")}
     else if (input$ecosystem_services_checkbox == "Meadow Health"){img(src= "meadow_health.png", height="50%", width="50%", align="left")}
-    else if (input$ecosystem_services_checkbox == "Recreation and Cultural Connections"){img(src= "recreation.jpeg", height="50%", width="50%", align="left")}
+        else if (input$ecosystem_services_checkbox == "Recreation and Cultural Connections"){img(src= "recreation.jpeg", height="50%", width="50%", align="left")}
     else if (input$ecosystem_services_checkbox == "Watershed Services"){img(src= "watershed_services.jpeg", height="50%", width="50%", align="left")}
     else if (input$ecosystem_services_checkbox == "Water"){img(src = "water.jpeg", height="50%", width="50%", align="left")}
   })
@@ -387,12 +392,12 @@ server <- function(input, output) {
 # Tab 4: Impacts to ecosystem benefits
   impacts_reactive <- reactive({
     summary_impacts %>% 
-      filter(Organization %in% input$organization_type)
+      filter(org_type %in% input$organization_type)
   })
   
   output$impacts_plot_reactive <- renderPlot(
     ggplot(data = impacts_reactive()) +
-      geom_col(aes(x = impacts, y = n, fill = Organization)) +
+      geom_col(aes(x = impacts, y = n, fill = org_type)) +
       theme_minimal() +
       labs(y = "Count of responses",
            fill = "Organization type") +
