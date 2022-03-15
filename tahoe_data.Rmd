@@ -17,6 +17,7 @@ library(maps)
 library(mapdata)
 library(ggmap)
 library(plotly)
+library(stringr)
 ```
 
 Read in data
@@ -179,7 +180,10 @@ mgmt_tidy_sf <- mgmt_sf %>%
     ) %>% 
   pivot_longer(c(1:13), names_to = "management_concern", values_to = "count") %>% 
   filter(count >= 1)
+  
   #drop_na()
+
+mgmt_tidy_sf$organization = str_to_title(mgmt_tidy_sf$responde_8)
 
 class(mgmt_tidy_sf)
 
@@ -226,13 +230,15 @@ impacts_subset <- impacts %>%
   pivot_longer(c(1:20), names_to = "impacts", values_to = "count") %>% 
   drop_na()
  
+impacts_subset$Organization = str_to_title(impacts_subset$org_type)
+
 summary_impacts <- impacts_subset %>% 
-  group_by(impacts, org_type) %>% 
+  group_by(impacts, Organization) %>% 
   summarize(n = n())
 
 
 impacts_plot <- ggplot(data = summary_impacts) +
-  geom_col(aes(x = org_type, y = n, fill = impacts)) +
+  geom_col(aes(x = Organization, y = n, fill = impacts)) +
   coord_flip() +
   theme_minimal()
 

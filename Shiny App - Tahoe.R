@@ -152,12 +152,15 @@ impacts_subset <- impacts %>%
   pivot_longer(c(1:20), names_to = "impacts", values_to = "count") %>% 
   drop_na()
 
+impacts_subset$Organization = str_to_title(impacts_subset$org_type)
+
 summary_impacts <- impacts_subset %>% 
-  group_by(impacts, org_type) %>% 
+  group_by(impacts, Organization) %>% 
   summarize(n = n())
 
+
 impacts_plot <- ggplot(data = summary_impacts) +
-  geom_bar(aes(x = impacts, fill = org_type)) +
+  geom_col(aes(x = Organization, y = n, fill = impacts)) +
   coord_flip() +
   theme_minimal()
 
@@ -184,7 +187,7 @@ mgmt_tidy_sf <- mgmt_sf %>%
   ) %>% 
   pivot_longer(c(1:13), names_to = "management_concern", values_to = "count") %>% 
   filter(count >= 1) 
-  #drop_na()
+
 
 ## Management map with terrain basemap
 mgmt_map <- ggmap(tahoe_basemap) +
@@ -218,6 +221,9 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                      br(),
                                      p("This application visualizes survey responses from individuals in the Tahoe-Central Sierra Region. Surveys were conducted as part of a Group Project at the Bren School."),
                                      br(),
+                                     br(),
+                                     br(),
+                                     p("Created by Brendan McGovern and Halley McVeigh. March 2022."),
                                      br())),
                  
                   # Tab 2: Ecosystem Services Overview 
@@ -262,7 +268,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                              sidebarPanel(
                                checkboxGroupButtons(inputId = "organization_type",
                                                   label = "Select organization type:",
-                                                  choices = unique(summary_impacts$org_type)
+                                                  choices = unique(summary_impacts$Organization)
                                                   )
                              ),
                              mainPanel(h3("Impacts of Concern by Organization Type"),
@@ -380,12 +386,12 @@ server <- function(input, output) {
 # Tab 4: Impacts to ecosystem benefits
   impacts_reactive <- reactive({
     summary_impacts %>% 
-      filter(org_type %in% input$organization_type)
+      filter(Organization %in% input$organization_type)
   })
   
   output$impacts_plot_reactive <- renderPlot(
     ggplot(data = impacts_reactive()) +
-      geom_col(aes(x = impacts, y = n, fill = org_type)) +
+      geom_col(aes(x = impacts, y = n, fill = Organization)) +
       theme_minimal() +
       labs(y = "Count of responses",
            fill = "Organization type") +
