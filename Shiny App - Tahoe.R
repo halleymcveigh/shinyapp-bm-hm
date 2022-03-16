@@ -204,7 +204,7 @@ mgmt_map
 
 
 ###### Create the user interface
-ui <- fluidPage(theme = shinytheme("darkly"),
+ui <- fluidPage(theme = shinytheme("flatly"),
                 titlePanel("Ecosystem Services of Interest in the Tahoe-Central Sierra Region - Blue Forest Conservation"),
                 navbarPage(
                   "Explore the Study Area",
